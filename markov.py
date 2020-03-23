@@ -56,6 +56,7 @@ P_squared = P.dot(P)
 
 ############ calculate life expectancy from AHS state i (note python index starts at 0) ######### <--- Part (b)
 i = 5 -1 # i.e. AHS state 5
+# TODO: solve with a threshold policy!!!!!
 Q = P[0:12,0:12]
 R = P[0:12,12:14]
 I = np.identity(12) # P[12:14,12:14]
@@ -67,3 +68,5 @@ print(patient_lifetime[i]) # returns the lifetime pre-death/transplat for a give
 
 
 ########### Calculate prob of transplat before death ####### <--- Part (c)
+
+exit_states_from_starting_states = transposed.dot(R)
