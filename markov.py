@@ -16,6 +16,19 @@ transplant_prob = np.array([0.0001, 0.0002, 0.0002, 0.0003, 0.0004, 0.0006, 0.00
 def rate_to_prob(rate):
     return 1 - np.exp(-1*rate)
 
+def apply_threshold(P, threshold_index):
+    removed_prob = 0
+    for row in range(0, threshold_index):
+        removed_prob += P[row][-1]
+        P[row][-1] = 0
+        
+    basic_threshold = P[0:12,-1] # i.e. the updated last row
+    allocation_factor = basic_threshold/sum(basic_threshold)
+    for row in range(threshold_index, 12):
+        P[row][-1] += allocation_factor[row]*removed_prob
+        
+    return P
+
 ##### Create the P matrix #####
 deteriorate_prob = rate_to_prob(deteriorate_rate[0])
 death_prob = rate_to_prob(death_rate[0])
@@ -55,7 +68,11 @@ P = np.append(P, [row], axis=0)
 P_squared = P.dot(P)
 
 ############ calculate life expectancy from AHS state i (note python index starts at 0) ######### <--- Part (b)
-i = 5 -1 # i.e. AHS state 5
+AHS_starting_state = 5 -1 # i.e. AHS state 5
+AHS_threshold = 5 -1 # i.e. only accept the liver if we are at AHS state 5+
+
+P = apply_threshold(P, AHS_threshold)
+
 # TODO: solve with a threshold policy!!!!!
 Q = P[0:12,0:12]
 R = P[0:12,12:14]
