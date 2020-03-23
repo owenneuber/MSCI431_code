@@ -20,12 +20,14 @@ def apply_threshold(P, threshold_index):
     removed_prob = 0
     for row in range(0, threshold_index):
         removed_prob += P[row][-1]
-        P[row][-1] = 0
+        P[row][row] += P[row][-1] # the row's probs must always sum to 1 so we add the transplant prob to the prob of staying in the same state
+        P[row][-1] = 0 
         
     basic_threshold = P[0:12,-1] # i.e. the updated last row
     allocation_factor = basic_threshold/sum(basic_threshold)
     for row in range(threshold_index, 12):
         P[row][-1] += allocation_factor[row]*removed_prob
+        P[row][row] -= allocation_factor[row]*removed_prob # the row's probs must always sum to 1 so we subtract the added transplant prob from the prob of staying in the same state
         
     return P
 
@@ -73,7 +75,6 @@ AHS_threshold = 5 -1 # i.e. only accept the liver if we are at AHS state 5+
 
 P = apply_threshold(P, AHS_threshold)
 
-# TODO: solve with a threshold policy!!!!!
 Q = P[0:12,0:12]
 R = P[0:12,12:14]
 I = np.identity(12) # P[12:14,12:14]
