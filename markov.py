@@ -16,6 +16,21 @@ transplant_prob = np.array([0.0001, 0.0002, 0.0002, 0.0003, 0.0004, 0.0006, 0.00
 def rate_to_prob(rate):
     return 1 - np.exp(-1*rate)
 
+def apply_threshold(P, threshold_index):
+    removed_prob = 0
+    for row in range(0, threshold_index):
+        removed_prob += P[row][-1]
+        P[row][row] += P[row][-1] # the row's probs must always sum to 1 so we add the transplant prob to the prob of staying in the same state
+        P[row][-1] = 0 
+        
+    basic_threshold = P[0:12,-1] # i.e. the updated last row
+    allocation_factor = basic_threshold/sum(basic_threshold)
+    for row in range(threshold_index, 12):
+        P[row][-1] += allocation_factor[row]*removed_prob
+        P[row][row] -= allocation_factor[row]*removed_prob # the row's probs must always sum to 1 so we subtract the added transplant prob from the prob of staying in the same state
+        
+    return P
+
 ##### Create the P matrix #####
 deteriorate_prob = rate_to_prob(deteriorate_rate[0])
 death_prob = rate_to_prob(death_rate[0])
@@ -55,18 +70,29 @@ P = np.append(P, [row], axis=0)
 P_squared = P.dot(P)
 
 ############ calculate life expectancy from AHS state i (note python index starts at 0) ######### <--- Part (b)
-i = 5 -1 # i.e. AHS state 5
-# TODO: solve with a threshold policy!!!!!
+AHS_starting_state = 5 -1 # i.e. AHS state 5
+AHS_threshold = 5 -1 # i.e. only accept the liver if we are at AHS state 5+
+
+P = apply_threshold(P, AHS_threshold)
+
 Q = P[0:12,0:12]
 R = P[0:12,12:14]
 I = np.identity(12) # P[12:14,12:14]
-transposed = np.linalg.inv(I-Q)
+inverted = np.linalg.inv(I-Q)
 ones = np.ones((12,1))
 
-patient_lifetime = transposed.dot(ones)
-print(patient_lifetime[i]) # returns the lifetime pre-death/transplat for a given AHS
+patient_lifetime = inverted.dot(ones)
+#print(patient_lifetime[AHS_starting_state]) # returns the lifetime pre-death/transplat for a given AHS
 
+# The variable patient_lifetime gives the answer to part (b) in list form for all possible "i" values.
 
 ########### Calculate prob of transplat before death ####### <--- Part (c)
 
-exit_states_from_starting_states = transposed.dot(R)
+# P[0:12,-2:] gives the row by row probs of death or transplant
+
+exit_states_from_starting_states = inverted.dot(R)
+
+
+
+
+
