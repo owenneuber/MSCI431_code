@@ -70,7 +70,7 @@ P = np.append(P, [row], axis=0)
 P_squared = P.dot(P)
 
 ############ calculate life expectancy from AHS state i (note python index starts at 0) ######### <--- Part (b)
-AHS_starting_state = 5 -1 # i.e. AHS state 5
+AHS_starting_state = 1 -1 # i.e. AHS state 5
 AHS_threshold = 5 -1 # i.e. only accept the liver if we are at AHS state 5+
 
 P = apply_threshold(P, AHS_threshold)
@@ -82,7 +82,7 @@ transposed = np.linalg.inv(I-Q)
 ones = np.ones((12,1))
 
 patient_lifetime = transposed.dot(ones)
-print(patient_lifetime[i]) # returns the lifetime pre-death/transplat for a given AHS
+print(patient_lifetime[AHS_starting_state]) # returns the lifetime pre-death/transplat for a given AHS
 
 
 ########### Calculate prob of transplat before death ####### <--- Part (c)
